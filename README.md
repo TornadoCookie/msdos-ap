@@ -4,8 +4,8 @@ MS-DOS Anti-Piracy: For more info watch this: https://www.youtube.com/watch?v=Ow
 This is a faithful recreation of the MS-DOS 6.22 Anti-Piracy by TheGreatUnknown Productions using ncurses.
 
 ## Installation
-To install, type:
+To install, type: <br>
     $ make all
 
-Then, to run the program, type:
+Then, to run the program, type: <br>
     $ ./launch.sh
