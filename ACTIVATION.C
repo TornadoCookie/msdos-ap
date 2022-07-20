@@ -19,6 +19,7 @@ int main() {
     puts("ERROR: NO ACTIVATION ID FOUND");
     #endif
     initscr();
+    clear();
     noecho();
     curs_set(0);
     printw("Starting MS-DOS...\n\n");
