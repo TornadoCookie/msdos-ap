@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <locale.h>
 #include "OGG.H"
 
 #ifdef _WIN32
@@ -13,15 +14,30 @@
 #define cmd_clear "clear"
 #endif
 
+
+wchar_t *repeatStr (const wchar_t *str, size_t count) {
+    if (count == 0) return L"";
+    wchar_t *ret = (wchar_t*)malloc(wcslen(str) * WCHAR_WIDTH * count + count);
+    if (ret == NULL) return NULL;
+    wcscpy (ret, str);
+    while (--count > 0) {
+        ret = wcscat (ret, str);
+    }
+    return ret;
+}
+
+
 int process_main_input = TRUE;
 int process_licensekey_input = TRUE;
 
 bool can_restart = true;
 
 void restart() {
+    if (!can_restart) return;
     can_restart = false;
     refresh();
     clear();
+    endwin();
     system("DOS/AP/ACTIVATION.COM");
 }
 
@@ -44,7 +60,7 @@ void prints(const char *fmt) {
 
 void setFooterText(const char *msg) {
     attron(A_STANDOUT);
-    mvprintw(21, 0, msg);
+    mvprintw(21, 0, "%s", msg);
     attroff(A_STANDOUT);
 }
 
@@ -138,28 +154,28 @@ void license_activation() {
         if (c == '1' || c == '2' || c == '3' || c == '4') break;
     }
     attron(A_STANDOUT);
-    mvprintw(7, 15, "-----------------------------------------------");
-    mvprintw(8, 15, "|             License key activation          |");
+    mvaddwstr(7, 15, L"┌─────────────────────────────────────────────┐");
+    mvaddwstr(8, 15, L"│             License key activation          │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(9, 15, "|                                             |");
+    mvaddwstr(9, 15, L"│                                             │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(10, 15, "|            Press any key to type            |");
+    mvaddwstr(10, 15, L"│            Press any key to type            │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(11, 15, "|                                             |");
+    mvaddwstr(11, 15, L"│                                             │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(12, 15, "|                                             |");
+    mvaddwstr(12, 15, L"│                                             │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(13, 15, "-----------------------------------------------");
+    mvaddwstr(13, 15, L"└─────────────────────────────────────────────┘");
     attroff(A_STANDOUT);
     printw("  ");
     mvprintw(14, 15, "                                                 ");
@@ -167,15 +183,15 @@ void license_activation() {
     char input[21] = "";
     setFooterText(" F1=Help     F2= Show visual example                                             ");
     move(10, 28);
-    echo();
+    noecho();
     int visualExampleOpen = FALSE;
     int firstKeyCode = TRUE;
     while (1) {
         int c = getch();
-        if (c == 8) {
+        if (c == 8 || c == KEY_BACKSPACE) {
             input[strlen(input)] = '\0';
             attron(A_STANDOUT);
-            echo();
+            noecho();
         } else if ((isprint(c) || c == ' ') && strlen(input) != 21) {
             if (firstKeyCode) {
                 setFooterText(" F1=Help     ENTER = Verify license key                                          ");
@@ -183,8 +199,9 @@ void license_activation() {
                 move(10, 28);
                 firstKeyCode = FALSE;
             }
-            input[strlen(input)+1] = c;
-            input[strlen(input)+2] = '\0';
+            input[strlen(input)] = c;
+            input[strlen(input)+1] = '\0';
+            mvprintw(10, 28, "%-21s", input);
         } else if (c == KEY_ENTER || c == '\n') {
             break;
         } else if (strlen(input) == 20) {
@@ -259,28 +276,28 @@ void license_activation() {
     attroff(A_STANDOUT);
     refresh();
     attron(A_STANDOUT);
-    mvprintw(7, 15, "-----------------------------------------------");
-    mvprintw(8, 15, "|             License key activation          |");
+    mvaddwstr(7, 15, L"┌─────────────────────────────────────────────┐");
+    mvaddwstr(8, 15, L"│             License key activation          │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(9, 15, "|                                             |");
+    mvaddwstr(9, 15, L"│                                             │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(10, 15, "|            Press any key to type            |");
+    mvaddwstr(10, 15, L"│            Press any key to type            │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(11, 15, "|                                             |");
+    mvaddwstr(11, 15, L"│                                             │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(12, 15, "|                                             |");
+    mvaddwstr(12, 15, L"│                                             │");
     attroff(A_STANDOUT);
     printw("  ");
     attron(A_STANDOUT);
-    mvprintw(13, 15, "-----------------------------------------------");
+    mvaddwstr(13, 15, L"└─────────────────────────────────────────────┘");
     attroff(A_STANDOUT);
     printw("  ");
     mvprintw(14, 15, "                                                 ");
@@ -352,14 +369,14 @@ void license_activation() {
     attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND));
     attron(A_STANDOUT);
     refresh();
-    mvprintw(7, 15, "----------------------------------------------");
-    mvprintw(8, 15, "|        Floppy disk verification            |");
-    mvprintw(9, 15, "|                                            |");
-    mvprintw(10, 15,"|                                            |");
-    mvprintw(11, 15,"|  ----------------------------------------  |");
-    mvprintw(12, 15,"|                                            |");
-    mvprintw(13, 15,"|                                            |");
-    mvprintw(14, 15,"----------------------------------------------");
+    mvaddwstr(7, 15, L"┌────────────────────────────────────────────┐");
+    mvaddwstr(8, 15, L"│        Floppy disk verification            │");
+    mvaddwstr(9, 15, L"│                                            │");
+    mvaddwstr(10, 15,L"│                                            │");
+    mvaddwstr(11, 15,L"│  ----------------------------------------  │");
+    mvaddwstr(12, 15,L"│                                            │");
+    mvaddwstr(13, 15,L"│                                            │");
+    mvaddwstr(14, 15,L"└────────────────────────────────────────────┘");
     refresh();
     attroff(A_STANDOUT);
     mvprintw(8, 61, "  ");
@@ -370,47 +387,11 @@ void license_activation() {
     mvprintw(13, 61, "  ");
     mvprintw(14, 61, "  ");
     mvprintw(15, 17, "                                              ");
-    mvprintw(11, 18, "                                        ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "#                                       ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "##                                      ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "####                                    ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "#####                                   ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "#######                                 ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "###########                             ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "##############                          ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "###################                     ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "######################                  ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "###########################             ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "###################################     ");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "########################################");
-    sleep(1);
-    refresh();
-    mvprintw(11, 18, "########################################");
-    refresh();
+    for (int i = 0; i < 40; i++) {
+        mvprintw(11, 18, "%-40ls", repeatStr(L"▒", i));
+        refresh();
+        usleep(100000);
+    }
     move(0,0);
     clear();
     setFooterText(" F1=Help     F2 = Skip     F3= Replace step     ENTER= Continue                   ");
@@ -474,6 +455,7 @@ void license_activation() {
     attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND));
     attron(A_STANDOUT);
     refresh();
+
     while (1) {
         int c = getch();
         if (c == '\n' || c == KEY_ENTER) break;
@@ -505,7 +487,7 @@ void license_activation() {
            "                                                                                  \n"
            "                                                                                  \n");
     move(0,0);
-    printw("Microsoft MS-DOS 6.22 Activation                                                  \n"
+    addwstr(L"Microsoft MS-DOS 6.22 Activation                                                  \n"
            " ==============================                                                   \n"
            "                                                                                  \n"
            "     Please wait while we verify your license key.                                \n"
@@ -518,87 +500,23 @@ void license_activation() {
            "                                                                                  \n"
            "                                                                                  \n"            
            "                                                                                  \n"
-           "   ---------------------------------------------------------------------------    \n"
-           "   |                                                                         |    \n"
-           "   ---------------------------------------------------------------------------    \n");
+           "   ┌─────────────────────────────────────────────────────────────────────────┐    \n"
+           "   │                                                                         │    \n"
+           "   └─────────────────────────────────────────────────────────────────────────┘    \n");
     playSoundInNewThread("Dial_up_modem_noises.ogg");
     attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND));
-    attron(A_STANDOUT);
-    refresh();
-    mvprintw(20, 0, " Establishing connection with network modem.                                      ");
-    attroff(A_STANDOUT);
-    attron(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    mvprintw(14, 5, "                                                                        ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "######                                                                  ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "##########                                                              ");
-    sleep(1);
-    refresh();
-    attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    attron(A_STANDOUT);
-    mvprintw(20, 0, " Dialing activation servers...                                                   ");
-    attroff(A_STANDOUT);
-    attron(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    mvprintw(14, 5, "###############                                                         ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "##################                                                      ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "########################                                                ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "##############################                                          ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "######################################                                  ");
-    sleep(1);
-    refresh();
-    attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    attron(A_STANDOUT);
-    mvprintw(20, 0, " Sending information... (968KB)                                                  ");
-    attroff(A_STANDOUT);
-    attron(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    mvprintw(14, 5, "#####################################################                   ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "########################################################                ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "################################################################        ");
-    sleep(1);
-    refresh();
-    attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    attron(A_STANDOUT);
-    mvprintw(20, 0, " Recieving information....                                                       ");
-    attroff(A_STANDOUT);
-    attron(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    mvprintw(14, 5, "###################################################################    ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "####################################################################   ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "#####################################################################  ");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "###################################################################### ");
-    sleep(1);
-    refresh();
-    attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    attron(A_STANDOUT);
-    mvprintw(20, 0, " Finishing...                                                                    ");
-    attroff(A_STANDOUT); 
-    attron(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
-    mvprintw(14, 5, "#######################################################################");
-    sleep(1);
-    refresh();
-    mvprintw(14, 5, "#######################################################################");
-    sleep(1);
-    refresh();
+    for (int i = 0; i < 71; i++) {
+        attron(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
+        mvprintw(14, 5, "%-71ls", repeatStr(L"▒", i));
+        attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));
+        setFooterText(" Establishing connection with network modem.                                     ");
+        if (i > 10) setFooterText(" Dialing activation servers...                                                   ");
+        if (i > 25) setFooterText(" Sending information... (968KB)                                                  ");
+        if (i > 50) setFooterText(" Recieving information....                                                       ");
+        if (i > 60) setFooterText(" Finishing...                                                                    ");
+        refresh();
+        usleep(300000);
+    }
     stopSound();
 skip:
     clear();
@@ -627,7 +545,7 @@ skip:
            "                                                                                  \n"
            "                                                                                  \n");
     move(0,0);
-    printw("Microsoft MS-DOS 6.22 Activation                                                  \n"
+    addwstr(L"Microsoft MS-DOS 6.22 Activation                                                  \n"
            " ==============================                                                   \n"
            "                                                                                  \n"
            "     Thank you for attempting to activate MS-DOS!                                 \n"
@@ -635,42 +553,24 @@ skip:
            "     Your computer will restart within a few seconds...                           \n"
            "                                                                                  \n"
            "                                                                                  \n"
-           "   ---------------------------------------------------------------------------    \n"
-           "   |                                                                         |    \n"
-           "   ---------------------------------------------------------------------------    \n");  
+           "   ┌─────────────────────────────────────────────────────────────────────────┐    \n"
+           "   │                                                                         │    \n"
+           "   └─────────────────────────────────────────────────────────────────────────┘    \n");  
     attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND));
     attron(A_STANDOUT);
     refresh();
-    mvprintw(20, 0, " ENTER = RESTART NOW                                                              ");
+    pthread_t restart_now_thread;
+    pthread_create(&restart_now_thread, NULL, waitForEnter, NULL);
+    setFooterText(" ENTER = RESTART NOW                                                              ");
     attroff(A_STANDOUT);
     attron(COLOR_PAIR(FLOPPY_ACTIVATION));
-    mvprintw(9, 5, "#######################################################################");
-    sleep(1);
-    refresh();
-    mvprintw(9, 5, "###################################################################    ");
-    sleep(1);
-    refresh();
-    mvprintw(9, 5, "##############################################################         ");
-    sleep(1);
-    refresh();
-    mvprintw(9, 5, "################################################                       ");
-    sleep(1);
-    refresh();
-    mvprintw(9, 5, "################################                                       ");
-    sleep(1);
-    refresh();
-    mvprintw(9, 5, "####################                                                   ");
-    sleep(1);
-    refresh();
-    mvprintw(9, 5, "#########                                                              ");
-    sleep(1);
-    refresh();
-    mvprintw(9, 5, "###                                                                    ");
-    sleep(1);
-    refresh();
-    mvprintw(9, 5, "                                                                       ");
-    sleep(1);
-    restart();
+    for (int i = 71; i > 0; i--) {
+        if (!can_restart) break;
+        mvprintw(9, 5, "%-71ls", repeatStr(L"▒", i));
+        refresh();
+        usleep(100000);
+    }
+    if (can_restart) restart();
 }
 
 void license_key() {
@@ -838,6 +738,7 @@ int main() {
         "SHUT DOWN COMPUTER                                     \n"
     };
     printf("\a");
+    setlocale(LC_ALL, "C.utf8");
     initscr();
     clear();
     refresh();
