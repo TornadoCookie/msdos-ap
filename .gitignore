@@ -52,3 +52,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 .vscode/settings.json
+.vscode/configurationCache.log
+.vscode/dryrun.log
+.vscode/targets.log
