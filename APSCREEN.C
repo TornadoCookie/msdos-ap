@@ -21,6 +21,8 @@ void prints(const char *fmt) {
 }
 
 int main() {
+    //Clear up any other instances of ACTIVATION.COM
+    system("killall -w ACTIVATION.COM");
     initscr();
     noecho();
     clear();
@@ -64,10 +66,12 @@ int main() {
         } else {
             endwin();
             stopSound();
+            clear();
             return 0;
         }
     }
     endwin();
     stopSound();
+    clear();
     return 0;
 }
