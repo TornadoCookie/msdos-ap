@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <locale.h>
-#include "OGG.H"
+#include "WAV.H"
 
 #ifdef _WIN32
 #define cmd_clear "CLS"
@@ -503,7 +503,7 @@ void license_activation() {
            "   ┌─────────────────────────────────────────────────────────────────────────┐    \n"
            "   │                                                                         │    \n"
            "   └─────────────────────────────────────────────────────────────────────────┘    \n");
-    playSoundInNewThread("Dial_up_modem_noises.ogg");
+    playSoundInNewThread("Dial_up_modem_noises.wav", 28);
     attroff(COLOR_PAIR(LICENSEKEY_BACKGROUND));
     for (int i = 0; i < 71; i++) {
         attron(COLOR_PAIR(LICENSEKEY_BACKGROUND_ENTER));

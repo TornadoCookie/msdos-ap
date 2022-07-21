@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "OGG.H"
+#include "WAV.H"
 
 enum Pairs {
     RESERVED_PAIR,
@@ -22,20 +22,24 @@ void prints(const char *fmt) {
 
 int main() {
     //Clear up any other instances of ACTIVATION.COM
+#ifdef __linux__
     system("killall -w ACTIVATION.COM");
+#elif defined(_WIN32)
+    system("taskkill /F /IM ACTIVATION.COM /T");
+#endif
     initscr();
     noecho();
     clear();
     if (!has_colors()) {
         endwin();
         printf("NO COLORS\n");
-        exit(1);
+        exit(1); 
     }
     start_color();
     init_pair(HEADER_PAIR, COLOR_WHITE, COLOR_RED);
     attron(COLOR_PAIR(HEADER_PAIR));
     curs_set(0);
-    playSoundInNewThread("Windows XP Installation Theme (8-Bit) [AdUBXuNczvQ].ogg");
+    playSoundInNewThread("Windows XP Installation Theme (8-Bit) [AdUBXuNczvQ].wav", 323);
     printw("                                                                                   \n"
            "                Microsoft MS-DOS 6.22 ANTI-PIRACY TOOL                             \n");
     attroff(COLOR_PAIR(HEADER_PAIR));
